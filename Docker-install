@@ -1,0 +1,97 @@
+# Docker Installation on AWS Amazon Linux
+
+## Prerequisites
+- Access to an EC2 instance running Amazon Linux 2
+- Root or sudo privileges
+
+---
+
+## Step 1: Update the System Package Manager
+```bash
+sudo yum update -y
+```
+**Purpose:** Updates all system packages to the latest versions
+
+---
+
+## Step 2: Install Docker
+```bash
+sudo yum install docker -y
+```
+**Purpose:** Installs the Docker engine on the system
+
+---
+
+## Step 3: Start Docker Service
+```bash
+sudo systemctl start docker
+```
+**Purpose:** Starts the Docker daemon/service
+
+---
+
+## Step 4: Enable Docker Service to Start on Boot
+```bash
+sudo systemctl enable docker
+```
+**Purpose:** Enables Docker to automatically start when the system boots up
+
+---
+
+## Step 5: Add User to Docker Group (Optional but Recommended)
+```bash
+sudo usermod -a -G docker $USER
+```
+**Purpose:** Allows the current user to run Docker commands without requiring sudo
+
+### Apply New Group Membership
+```bash
+newgrp docker
+```
+**Purpose:** Activates the new docker group membership without needing to log out
+
+---
+
+## Step 6: Verify Docker Installation
+```bash
+docker --version
+```
+**Purpose:** Displays the installed Docker version
+
+```bash
+docker run hello-world
+```
+**Purpose:** Runs a test container to verify Docker is working correctly
+
+---
+
+## Step 7: Check Docker Service Status (Optional)
+```bash
+sudo systemctl status docker
+```
+**Purpose:** Shows the current status of the Docker service
+
+---
+
+## Summary of Commands
+```bash
+# All-in-one installation script
+sudo yum update -y
+sudo yum install docker -y
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -a -G docker $USER
+newgrp docker
+docker --version
+docker run hello-world
+```
+
+---
+
+## Troubleshooting Tips
+- If you get permission denied, try logging out and back in, or use `newgrp docker`
+- To check Docker logs: `sudo journalctl -u docker`
+- To restart Docker: `sudo systemctl restart docker`
+
+
+
