@@ -1,0 +1,232 @@
+# Docker Hub Login Setup Guide
+
+## Prerequisites
+- Docker installed and running
+- Docker Hub account (create one at https://hub.docker.com/ if you don't have one)
+- Docker Hub username and password (or access token)
+
+---
+
+## Step 1: Login to Docker Hub from Terminal
+```bash
+docker login
+```
+
+**Output:**
+```
+Login with your Docker credentials
+
+Username: your-dockerhub-username
+Password: 
+WARNING! Your password will be stored unencrypted in /home/user/.docker/config.json
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+```
+
+**Purpose:** Authenticates your local Docker client with Docker Hub
+
+---
+
+## Step 2: Verify Login (Optional)
+```bash
+cat ~/.docker/config.json
+```
+
+**Purpose:** Displays the stored credentials (base64 encoded)
+
+---
+
+## Step 3: Use Access Token for Enhanced Security (Recommended)
+Instead of using your Docker Hub password, create and use a Personal Access Token:
+
+### A. Create a Personal Access Token on Docker Hub
+1. Go to https://hub.docker.com/settings/security
+2. Click "New Access Token"
+3. Enter a token name (e.g., "Docker-CLI")
+4. Select appropriate permissions (Read & Write recommended)
+5. Click "Generate"
+6. Copy the token and save it securely
+
+### B. Login Using the Access Token
+```bash
+docker login -u your-dockerhub-username
+```
+
+When prompted for password, paste your access token instead of your password.
+
+---
+
+## Step 4: Push an Image to Docker Hub
+
+### A. Build a Docker Image (if you don't have one)
+```bash
+docker build -t my-app:latest .
+```
+
+**Purpose:** Builds a Docker image from a Dockerfile in the current directory
+
+### B. Tag the Image with Your Docker Hub Username
+```bash
+docker tag my-app:latest your-dockerhub-username/my-app:latest
+```
+
+**Purpose:** Tags the local image with your Docker Hub repository format
+
+**Format:** `<docker-hub-username>/<repository-name>:<tag>`
+
+### C. Push the Image to Docker Hub
+```bash
+docker push your-dockerhub-username/my-app:latest
+```
+
+**Example:**
+```bash
+docker push john-doe/my-app:latest
+```
+
+**Purpose:** Uploads the image to your Docker Hub repository
+
+---
+
+## Step 5: Pull an Image from Docker Hub
+
+### A. Pull a Public Image (No Login Required)
+```bash
+docker pull ubuntu:latest
+```
+
+### B. Pull Your Private Image (Login Required)
+```bash
+docker pull your-dockerhub-username/my-app:latest
+```
+
+**Example:**
+```bash
+docker pull john-doe/my-app:latest
+```
+
+**Purpose:** Downloads the image from Docker Hub to your local system
+
+### C. Run the Pulled Image
+```bash
+docker run -d --name my-container your-dockerhub-username/my-app:latest
+```
+
+---
+
+## Step 6: Logout from Docker Hub (if needed)
+```bash
+docker logout
+```
+
+**Purpose:** Removes authentication credentials from your local system
+
+---
+
+## Useful Commands Reference
+
+```bash
+# View all local images
+docker images
+
+# View all running containers
+docker ps
+
+# View all containers (including stopped)
+docker ps -a
+
+# Remove an image
+docker rmi image-id
+
+# Check login status
+docker info | grep Username
+
+# List images in your Docker Hub repository
+docker search your-dockerhub-username
+
+# View push/pull history
+docker history your-dockerhub-username/my-app:latest
+```
+
+---
+
+## Common Workflows
+
+### Complete Push Workflow
+```bash
+# Build the image
+docker build -t my-app:1.0 .
+
+# Tag it with your Docker Hub username
+docker tag my-app:1.0 your-dockerhub-username/my-app:1.0
+
+# Login to Docker Hub
+docker login
+
+# Push the image
+docker push your-dockerhub-username/my-app:1.0
+```
+
+### Complete Pull and Run Workflow
+```bash
+# Pull the image
+docker pull your-dockerhub-username/my-app:1.0
+
+# Run the container
+docker run -d --name my-app-container your-dockerhub-username/my-app:1.0
+
+# Verify it's running
+docker ps
+```
+
+---
+
+## Troubleshooting
+
+### 1. "Error response from daemon: unauthorized"
+- **Solution:** You haven't logged in or credentials are incorrect
+- **Fix:** Run `docker login` again and verify your credentials/token
+
+### 2. "docker: command not found"
+- **Solution:** Docker is not installed or not in PATH
+- **Fix:** Install Docker or check your Docker installation
+
+### 3. "denied: requested access to the resource is denied"
+- **Solution:** Trying to push to a repository you don't have access to
+- **Fix:** Ensure the tag matches your username: `your-username/repo-name`
+
+### 4. "Pull access denied"
+- **Solution:** Trying to pull a private image without login
+- **Fix:** Run `docker login` with the correct credentials
+
+### 5. "Credential stored with wrong username"
+- **Solution:** Credentials were stored for a different account
+- **Fix:** Run `docker logout` and `docker login` again
+
+---
+
+## Security Best Practices
+
+✓ Use Personal Access Tokens instead of passwords
+✓ Never commit `~/.docker/config.json` to version control
+✓ Use credential helpers to encrypt stored credentials:
+  ```bash
+  # macOS
+  brew install docker-credential-osxkeychain
+  
+  # Linux
+  sudo apt-get install docker.io pass
+  ```
+
+✓ Regularly rotate access tokens
+✓ Limit token permissions to only what's needed
+✓ Keep tokens in secure password managers
+
+---
+
+## Additional Resources
+- Docker Hub Registry: https://hub.docker.com
+- Docker Login Documentation: https://docs.docker.com/engine/reference/commandline/login/
+- Security & Best Practices: https://docs.docker.com/develop/dev-best-practices/

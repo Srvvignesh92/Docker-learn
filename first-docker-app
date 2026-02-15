@@ -1,0 +1,536 @@
+# My First Docker Application
+
+## Part 1: Simple Docker Operations - Ubuntu Image
+
+### Step 1.1: Pull the Ubuntu Image
+```bash
+docker pull ubuntu:latest
+```
+
+**Output:**
+```
+latest: Pulling from library/ubuntu
+445a6a6a0ca9: Download complete
+Digest: sha256:6042500cf4b44f...
+Status: Downloaded newer image for ubuntu:latest
+```
+
+**Purpose:** Downloads the latest Ubuntu image from Docker Hub to your local system
+
+---
+
+### Step 1.2: Verify the Image is Downloaded
+```bash
+docker images
+```
+
+**Expected Output:**
+```
+REPOSITORY   TAG       IMAGE ID       CREATED        SIZE
+ubuntu       latest    08d221c9b1cc   2 weeks ago    77.8MB
+```
+
+**Purpose:** Lists all available Docker images on your system to verify the pull was successful
+
+---
+
+### Step 1.3: Run the Ubuntu Container Interactively
+```bash
+docker run -it ubuntu:latest /bin/bash
+```
+
+**Explanation:**
+- `-i`: Keeps STDIN open even if not attached (interactive)
+- `-t`: Allocates a pseudo-terminal
+- `ubuntu:latest`: The image to run
+- `/bin/bash`: The command to execute (starts bash shell)
+
+**What Happens:**
+```bash
+root@container-id:/#
+```
+You are now inside the Ubuntu container with a bash prompt
+
+---
+
+### Step 1.4: Run Commands Inside the Container
+```bash
+# Inside the container
+cat /etc/os-release
+```
+
+**Output:**
+```
+NAME="Ubuntu"
+VERSION="22.04.1 LTS (Jammy Jellyfish)"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 22.04.1 LTS"
+```
+
+**Purpose:** Verifies that you're running Ubuntu inside the container
+
+**Other useful commands to try:**
+```bash
+# Check current directory
+pwd
+
+# List files
+ls -la
+
+# Check installed packages
+apt list --installed | head -20
+
+# Update packages
+apt update
+
+# Exit the container
+exit
+```
+
+---
+
+### Step 1.5: Run a Container in Detached Mode
+```bash
+docker run -d --name ubuntu-container ubuntu:latest sleep 3600
+```
+
+**Explanation:**
+- `-d`: Run container in detached mode (runs in background)
+- `--name ubuntu-container`: Gives a human-readable name to the container
+- `sleep 3600`: Keeps the container running for 3600 seconds (1 hour)
+
+**Output:**
+```
+container-id-e.g.-abc123def456...
+```
+
+---
+
+### Step 1.6: Check Running Containers
+```bash
+docker ps
+```
+
+**Expected Output:**
+```
+CONTAINER ID   IMAGE     COMMAND             CREATED       STATUS       PORTS     NAMES
+abc123def456   ubuntu    "sleep 3600"        2 minutes ago Up 2 minutes          ubuntu-container
+```
+
+**Purpose:** Shows all currently running containers
+
+---
+
+### Step 1.7: Execute Commands in Running Container
+```bash
+docker exec -it ubuntu-container /bin/bash
+```
+
+**Purpose:** Executes a bash shell inside the running container without stopping it
+
+```bash
+# Inside the container
+echo "Hello from Docker!"
+hostname
+exit
+```
+
+---
+
+### Step 1.8: View Container Logs
+```bash
+docker logs ubuntu-container
+```
+
+**Purpose:** Shows the output/logs from the running container
+
+---
+
+### Step 1.9: Stop the Container
+```bash
+docker stop ubuntu-container
+```
+
+**Purpose:** Gracefully stops the running container
+
+**Verify it's stopped:**
+```bash
+docker ps
+```
+
+(Container should no longer appear in the list)
+
+---
+
+### Step 1.10: Remove the Container
+```bash
+docker rm ubuntu-container
+```
+
+**Purpose:** Deletes the stopped container from your system
+
+**Verify it's removed:**
+```bash
+docker ps -a
+```
+
+(The container should no longer appear, even in stopped containers)
+
+---
+
+## Part 2: Advanced Docker Operations - Nginx with Port Forwarding
+
+### Step 2.1: Pull the Nginx Image
+```bash
+docker pull nginx:latest
+```
+
+**Output:**
+```
+latest: Pulling from library/nginx
+...
+Status: Downloaded newer image for nginx:latest
+```
+
+**Purpose:** Downloads the Nginx web server image
+
+---
+
+### Step 2.2: Verify Nginx Image is Downloaded
+```bash
+docker images
+```
+
+**Expected Output:**
+```
+REPOSITORY   TAG       IMAGE ID       CREATED        SIZE
+nginx        latest    08d72d4d0971   2 days ago     142MB
+ubuntu       latest    08d221c9b1cc   2 weeks ago    77.8MB
+```
+
+**Purpose:** Confirms Nginx image is available locally
+
+---
+
+### Step 2.3: Run Nginx Container with Port Forwarding
+```bash
+docker run -d --name nginx-webserver -p 8080:80 nginx:latest
+```
+
+**Detailed Explanation:**
+- `-d`: Run in detached mode (background)
+- `--name nginx-webserver`: Assigns a name to the container
+- `-p 8080:80`: Port mapping (HOST_PORT:CONTAINER_PORT)
+  - Host Port: 8080 (your machine)
+  - Container Port: 80 (Nginx default port)
+- `nginx:latest`: The image to run
+
+**Output:**
+```
+container-id-e.g.-xyz789abc123...
+```
+
+---
+
+### Step 2.4: Verify Nginx Container is Running
+```bash
+docker ps
+```
+
+**Expected Output:**
+```
+CONTAINER ID   IMAGE              COMMAND                  CREATED       STATUS       PORTS                  NAMES
+xyz789abc123   nginx:latest       "/docker-entrypoint.…"   1 minute ago  Up 1 minute  0.0.0.0:8080->80/tcp   nginx-webserver
+```
+
+**Key Points:**
+- `PORTS`: Shows `0.0.0.0:8080->80/tcp` indicating port forwarding is active
+- `STATUS`: Shows `Up 1 minute` indicating container is running
+
+---
+
+### Step 2.5: Access the Nginx Web Page via Browser
+
+#### Option A: Using Terminal Commands
+```bash
+# Using curl to fetch the web page
+curl http://localhost:8080
+```
+
+**Expected Output:**
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+...
+<h1>Welcome to nginx!</h1>
+...
+</body>
+</html>
+```
+
+**Purpose:** Downloads and displays the Nginx default welcome page via terminal
+
+---
+
+#### Option B: Using a Web Browser
+1. Open your web browser (Chrome, Firefox, Safari, etc.)
+2. Go to: `http://localhost:8080`
+3. You should see the **"Welcome to nginx!"** page
+
+**What You'll See:**
+```
+Welcome to nginx!
+
+If you see this page, the nginx web server is successfully installed and 
+working. Further configuration is required.
+```
+
+---
+
+### Step 2.6: Check Nginx Container Logs
+```bash
+docker logs nginx-webserver
+```
+
+**Expected Output:**
+```
+/docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to start nginx in foreground
+...
+nginx: master process nginx -g daemon off;
+127.0.0.1 - - [15/Feb/2026:10:30:45 +0000] "GET / HTTP/1.1" 200 615 "-" "curl/7.68.0" "-"
+```
+
+**Purpose:** Shows Nginx startup logs and HTTP request logs
+
+---
+
+### Step 2.7: View More Detailed Container Information
+```bash
+docker inspect nginx-webserver
+```
+
+**Output Includes:**
+- Container ID
+- Image details
+- Network settings
+- Port mappings
+- Mounted volumes
+- Environment variables
+- CPU and memory limits
+
+**Useful for:** Understanding the full configuration of your running container
+
+---
+
+### Step 2.8: Check Container Resource Usage
+```bash
+docker stats nginx-webserver
+```
+
+**Output:**
+```
+CONTAINER ID   NAME               CPU %     MEM USAGE / LIMIT   MEM %
+xyz789abc123   nginx-webserver    0.00%     5.5MiB / 7.726GiB   0.07%
+```
+
+**Purpose:** Shows real-time CPU and memory usage of the container
+
+(Press `Ctrl + C` to exit)
+
+---
+
+### Step 2.9: Access Container Shell
+```bash
+docker exec -it nginx-webserver /bin/bash
+```
+
+**Inside the Container:**
+```bash
+# View Nginx configuration
+cat /etc/nginx/nginx.conf
+
+# Check Nginx version
+nginx -v
+
+# List processes
+ps aux
+
+# Exit container
+exit
+```
+
+---
+
+### Step 2.10: Modify Nginx Content (Optional)
+
+### Create a Custom HTML File
+```bash
+# On your local machine, create a simple HTML file
+mkdir -p my-nginx-content
+cat > my-nginx-content/index.html << EOF
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Docker Nginx Server</title>
+</head>
+<body>
+    <h1>Hello! This is my first Docker Nginx application</h1>
+    <p>Running successfully from a Docker container!</p>
+    <p>Host: Docker Container</p>
+    <p>Port: 8080</p>
+</body>
+</html>
+EOF
+```
+
+---
+
+### Step 2.11: Run Nginx with Custom Content
+```bash
+docker stop nginx-webserver
+docker rm nginx-webserver
+```
+
+**Then run with volume mount:**
+```bash
+docker run -d --name nginx-webserver -p 8080:80 -v $(pwd)/my-nginx-content:/usr/share/nginx/html nginx:latest
+```
+
+**Explanation:**
+- `-v local-path:container-path`: Mounts a volume
+- `$(pwd)/my-nginx-content`: Your local directory with custom HTML
+- `/usr/share/nginx/html`: Nginx default web root in container
+
+**Access it:**
+```bash
+curl http://localhost:8080
+```
+
+**Or in browser:** `http://localhost:8080`
+
+**Output:**
+```
+Hello! This is my first Docker Nginx application
+Running successfully from a Docker container!
+Host: Docker Container
+Port: 8080
+```
+
+---
+
+### Step 2.12: Stop and Clean Up
+```bash
+# Stop the container
+docker stop nginx-webserver
+
+# Remove the container
+docker rm nginx-webserver
+
+# Verify it's removed
+docker ps -a
+```
+
+---
+
+## Summary of Key Commands
+
+### Basic Container Operations
+```bash
+docker pull <image>              # Download an image
+docker run -d <image>            # Run container in background
+docker run -it <image> /bin/bash # Run container interactively
+docker ps                         # List running containers
+docker ps -a                      # List all containers
+docker logs <container-name>      # View container logs
+docker exec -it <name> /bin/bash  # Execute command in container
+docker stop <container-name>      # Stop a running container
+docker rm <container-name>        # Remove a container
+```
+
+### Port Forwarding
+```bash
+docker run -d -p HOST_PORT:CONTAINER_PORT <image>
+# Example: docker run -d -p 8080:80 nginx
+```
+
+### Volume Mounting
+```bash
+docker run -d -v /local/path:/container/path <image>
+# Example: docker run -d -v $(pwd)/html:/usr/share/nginx/html nginx
+```
+
+### Image Management
+```bash
+docker images                     # List all images
+docker rmi <image-id>             # Remove an image
+docker search <image-name>        # Search for images on Docker Hub
+```
+
+---
+
+## Troubleshooting
+
+### Port Already in Use
+```bash
+# Find what's using port 8080
+lsof -i :8080
+
+# Kill the process
+kill -9 <PID>
+
+# Or use a different port
+docker run -d -p 8081:80 nginx
+```
+
+### Container Not Starting
+```bash
+# Check logs for errors
+docker logs container-name
+
+# Run in interactive mode to see errors
+docker run -it nginx:latest
+```
+
+### Cannot Access Web Page
+- Ensure port mapping is correct: `docker ps` should show the port
+- Try using localhost: `http://localhost:8080`
+- On macOS with Docker Desktop, localhost should work
+- On Linux, make sure firewall allows port 8080
+- Check logs: `docker logs nginx-webserver`
+
+### Permission Denied
+```bash
+# Use sudo if needed
+sudo docker ps
+sudo docker run -d -p 8080:80 nginx
+
+# Or add user to docker group
+sudo usermod -a -G docker $USER
+newgrp docker
+```
+
+---
+
+## Next Steps
+
+After mastering these basics, you can:
+1. ✅ Create your own Dockerfile
+2. ✅ Build custom images
+3. ✅ Use Docker Compose for multi-container applications
+4. ✅ Implement health checks
+5. ✅ Set up environment variables
+6. ✅ Use Docker networking
+7. ✅ Push images to Docker Hub
+8. ✅ Implement CI/CD pipelines with Docker
+
+---
+
+## Resources
+
+- Docker Documentation: https://docs.docker.com/
+- Nginx Docker Image: https://hub.docker.com/_/nginx
+- Ubuntu Docker Image: https://hub.docker.com/_/ubuntu
+- Docker Best Practices: https://docs.docker.com/develop/dev-best-practices/
